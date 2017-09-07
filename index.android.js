@@ -4,13 +4,8 @@
  * @flow
  */
 
-import React, { Component } from 'react';
-import {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
-import weather from './app/weather'
+import React from 'react';
+import {AppRegistry} from 'react-native';
+import TabNav from './app/TabNav';
 
-AppRegistry.registerComponent('Weather', () => weather);
+AppRegistry.registerComponent('Weather', () => TabNav);

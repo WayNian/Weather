@@ -5,52 +5,73 @@
  */
 
 import React, {Component} from 'react';
-import {StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, ListView, Image} from 'react-native';
 
-const ONE_URL = 'http://v3.wufazhuce.com:8000/api/onelist/idlist/?channel=wdj&version=4.0.2&uuid=ffffffff-a90e-706a-63f7-ccf973aae5ee&platform=android';
+Dimensions = require('Dimensions');
+width = Dimensions.get('window').width;
+height = Dimensions.get('window').height;
 
 export default class article extends Component {
-    constructor(props){
-        super(props)
-        this.state={
-            value:''
+    /**
+     * 初始化数据
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            dataSource: new ListView.DataSource({rowHasChanged: ((row1, row2) => row1 !== row2)}),
+            load: false
         }
     }
 
-    getWeather() {
-        fetch(ONE_URL)
-            .then((response) => response.json())
-            .then((jsonData) => {
+    /**
+     * 加载耗时操作
+     */
+    componentDidMount() {
+        this.getDataFromFetch();
+    }
+
+    getDataFromFetch() {
+        fetch('http://gank.io/api/search/query/listview/category/福利/count/10/page/2')//请求地址
+            .then((response) => response.json())//取数据
+            .then((responseText) => {//处理数据
+                //通过setState()方法重新渲染界面
                 this.setState({
-                    value:jsonData.res
+                    //改变加载ListView
+                    load: true,
+                    //设置数据源刷新界面
+                    dataSource: this.state.dataSource.cloneWithRows(responseText.results),
                 })
             })
             .catch((error) => {
-                alert(`fetchDataId:${error}`);
-            });
+                console.warn(error);
+            }).done();
     }
 
     render() {
+        /**
+         * 因为数据时异步加载， 用load判断是否正在加载 如果加载完毕重新刷新界面改变load值
+         */
+        if (!this.state.load) {
+            return <Text>加载中</Text>
+        }
+        return (this.renderView(this.state.dataSource))
+    }
+
+    renderView() {
         return (
-            <TouchableOpacity style={styles.container}
-                              onPress={()=>{
-                                  this.fetchDataId()
-                              }}>
-                <Text style={styles.welcome}>
-                    网络获取{this.state.value}
-                </Text>
-            </TouchableOpacity>
-        );
+            <ListView
+                dataSource={this.state.dataSource}
+                renderRow={this.renderRow}/>
+        )
+    }
+
+    renderRow(rowData) {
+        return (
+            <View style={{flex: 1}}>
+                <Image source={{uri: rowData.url}}
+                       style={{width: width, height: height / 2, marginTop: 5}}/>
+            </View>
+        )
     }
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F5FCFF',
-    },
-
-});
 
